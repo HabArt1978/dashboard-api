@@ -1,7 +1,7 @@
 import express from "express"
 
 const userRouter = express.Router()
-
+// middleware роута "/users"
 userRouter.use((request, response, next) => {
   console.log(" - User handler  ", Date.now())
   next()
