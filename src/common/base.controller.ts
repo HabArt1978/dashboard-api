@@ -1,7 +1,6 @@
 import { Response, Router } from "express"
 import { LoggerService } from "../logger/logger.service"
 import { IControllerRoute } from "./route.interface"
-
 export abstract class BaseController {
   private readonly _router: Router
 
@@ -13,6 +12,7 @@ export abstract class BaseController {
     return this._router
   }
 
+  // методы облегчающие отправку статуса, чтобы не писать руками на каждом этапе.
   public send<T>(res: Response, code: number, message: T) {
     res.type("application/json")
     return res.status(code).json(message)
@@ -26,11 +26,12 @@ export abstract class BaseController {
     return res.sendStatus(201)
   }
 
+  // привязываем контекст к классу BaseController, наследники которого будут вызывать метод bindRoutes с привязкой к своему контексту
   protected bindRoutes(routes: IControllerRoute[]) {
     for (const route of routes) {
       this.logger.log(`[${route.method}] ${route.path}`)
-      const handler = route.func.bind(this)
-      this.router[route.method](route.path, handler)
+      const handlerContext = route.func.bind(this)
+      this.router[route.method](route.path, handlerContext)
     }
   }
 }

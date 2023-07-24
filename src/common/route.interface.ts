@@ -1,3 +1,5 @@
+// типизация роута контроллера
+
 import { NextFunction, Request, Response, Router } from "express"
 
 export interface IControllerRoute {
