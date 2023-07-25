@@ -1,6 +1,7 @@
 import { Logger, ILogObj } from "tslog"
+import { ILogger } from "./logger.interface"
 
-export class LoggerService {
+export class LoggerService implements ILogger {
   public logger: Logger<ILogObj>
 
   constructor() {
@@ -16,7 +17,7 @@ export class LoggerService {
   error(...args: unknown[]) {
     this.logger.error(...args)
   }
-  // журнал предупреждений с объектом json
+
   warn(...args: unknown[]) {
     this.logger.warn(...args)
   }
