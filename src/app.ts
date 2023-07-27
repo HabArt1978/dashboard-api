@@ -1,30 +1,26 @@
 // Модуль сборки приложения
 
 import express, { Express } from "express"
-
 import { Server } from "node:http"
-import { UsersController } from "./users/users.controller"
+import { UserController } from "./users/users.controller"
 import { ExeptionFilter } from "./errors/exeption.filter"
 import { ILogger } from "./logger/logger.interface"
-
+import { injectable, inject } from "inversify"
+import { TYPES } from "./types"
+import "reflect-metadata"
+@injectable()
 export class App {
   app: Express
   server: Server
   port: number
-  logger: ILogger
-  userController: UsersController
-  exeptionFilter: ExeptionFilter
 
   constructor(
-    loger: ILogger,
-    userController: UsersController,
-    exeptionFilter: ExeptionFilter,
+    @inject(TYPES.ILogger) private logger: ILogger,
+    @inject(TYPES.UserController) private userController: UserController,
+    @inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter,
   ) {
     this.app = express()
     this.port = 8000
-    this.logger = loger
-    this.userController = userController
-    this.exeptionFilter = exeptionFilter
   }
 
   useRoutes() {
