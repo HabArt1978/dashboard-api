@@ -8,6 +8,7 @@ import { IUserController } from './user.controller.interface';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
 import 'reflect-metadata';
+import { User } from './user.entity';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
@@ -24,8 +25,13 @@ export class UserController extends BaseController implements IUserController {
 		next(new HTTPError(401, 'ошибка авторизации', 'login'));
 	}
 
-	register({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		console.log(body);
-		this.ok(res, 'register');
+	async register(
+		{ body }: Request<{}, {}, UserRegisterDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const newUser = new User(body.name, body.email);
+		await newUser.setPassword(body.password);
+		this.ok(res, newUser);
 	}
 }
