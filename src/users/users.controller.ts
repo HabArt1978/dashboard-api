@@ -11,6 +11,7 @@ import { ValidateMiddleware } from '../common/validate.middleware';
 import { sign } from 'jsonwebtoken';
 import { IConfigService } from '../config/config.service.interface';
 import { IUserService } from './users.service.interface';
+import { AuthGuard } from '../common/auth.guard';
 import 'reflect-metadata';
 
 @injectable()
@@ -38,7 +39,7 @@ export class UserController extends BaseController implements IUserController {
 				path: '/info',
 				method: 'get',
 				func: this.info,
-				middlewares: [],
+				middlewares: [new AuthGuard()],
 			},
 		]);
 	}
@@ -71,11 +72,8 @@ export class UserController extends BaseController implements IUserController {
 	}
 
 	async info({ user }: Request, res: Response, next: NextFunction): Promise<void> {
-		if (!user) {
-			this.ok(res, { message: 'Hевалидный TOKEN' });
-		} else {
-			this.ok(res, { email: user.email });
-		}
+		const userInfo = await this.userService.getUserInfo(user.email);
+		this.ok(res, { email: userInfo?.email, id: userInfo?.id });
 	}
 
 	private singJWT(email: string, secret: string): Promise<string> {
