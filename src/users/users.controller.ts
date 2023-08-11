@@ -18,7 +18,7 @@ export class UserController extends BaseController implements IUserController {
 	constructor(
 		@inject(TYPES.ILogger) private loggerService: ILogger,
 		@inject(TYPES.UserService) private userService: IUserService,
-		@inject(TYPES.ConfigService) private confogService: IConfigService,
+		@inject(TYPES.ConfigService) private configService: IConfigService,
 	) {
 		super(loggerService);
 		this.bindRoutes([
@@ -34,19 +34,26 @@ export class UserController extends BaseController implements IUserController {
 				func: this.login,
 				middlewares: [new ValidateMiddleware(UserLoginDto)],
 			},
+			{
+				path: '/info',
+				method: 'get',
+				func: this.info,
+				middlewares: [],
+			},
 		]);
 	}
 
 	async login(
-		{ body }: Request<{}, {}, UserLoginDto>,
+		req: Request<{}, {}, UserLoginDto>,
 		res: Response,
 		next: NextFunction,
 	): Promise<void> {
-		const result = await this.userService.validateUser(body);
+		const result = await this.userService.validateUser(req.body);
 		if (!result) {
 			return next(new HTTPError(401, 'ошибка авторизации', 'login'));
 		}
-		const jwt = await this.singJWT(body.email, this.confogService.get('SECRET'));
+
+		const jwt = await this.singJWT(req.body.email, this.configService.get('SECRET'));
 		this.ok(res, { jwt });
 	}
 
@@ -58,8 +65,17 @@ export class UserController extends BaseController implements IUserController {
 		const result = await this.userService.createUser(body);
 		if (!result) {
 			return next(new HTTPError(422, 'Такой пользователь уже существует!'));
+		} else {
+			this.ok(res, { email: result.email, id: result.id });
 		}
-		this.ok(res, { email: result.email, id: result.id });
+	}
+
+	async info({ user }: Request, res: Response, next: NextFunction): Promise<void> {
+		if (!user) {
+			this.ok(res, { message: 'Hевалидный TOKEN' });
+		} else {
+			this.ok(res, { email: user.email });
+		}
 	}
 
 	private singJWT(email: string, secret: string): Promise<string> {
