@@ -10,7 +10,7 @@ import { UserRegisterDto } from './dto/user-register.dto';
 import { ValidateMiddleware } from '../common/validate.middleware';
 import { sign } from 'jsonwebtoken';
 import { IConfigService } from '../config/config.service.interface';
-import { IUserService } from './users.service.interface';
+import { IUsersService } from './users.service.interface';
 import { AuthGuard } from '../common/auth.guard';
 import 'reflect-metadata';
 
@@ -18,7 +18,7 @@ import 'reflect-metadata';
 export class UserController extends BaseController implements IUserController {
 	constructor(
 		@inject(TYPES.ILogger) private loggerService: ILogger,
-		@inject(TYPES.UserService) private userService: IUserService,
+		@inject(TYPES.UsersService) private usersService: IUsersService,
 		@inject(TYPES.ConfigService) private configService: IConfigService,
 	) {
 		super(loggerService);
@@ -49,7 +49,7 @@ export class UserController extends BaseController implements IUserController {
 		res: Response,
 		next: NextFunction,
 	): Promise<void> {
-		const result = await this.userService.validateUser(req.body);
+		const result = await this.usersService.validateUser(req.body);
 		if (!result) {
 			return next(new HTTPError(401, 'ошибка авторизации', 'login'));
 		}
@@ -63,7 +63,7 @@ export class UserController extends BaseController implements IUserController {
 		res: Response,
 		next: NextFunction,
 	): Promise<void> {
-		const result = await this.userService.createUser(body);
+		const result = await this.usersService.createUser(body);
 		if (!result) {
 			return next(new HTTPError(422, 'Такой пользователь уже существует!'));
 		} else {
@@ -72,7 +72,7 @@ export class UserController extends BaseController implements IUserController {
 	}
 
 	async info({ user }: Request, res: Response, next: NextFunction): Promise<void> {
-		const userInfo = await this.userService.getUserInfo(user.email);
+		const userInfo = await this.usersService.getUserInfo(user.email);
 		this.ok(res, { email: userInfo?.email, id: userInfo?.id });
 	}
 
