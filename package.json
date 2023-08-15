@@ -12,7 +12,7 @@
 		"generate": "prisma generate",
 		"lint:fix": "eslint ./src/** --fix",
 		"build": "tsc",
-		"test": "jest"
+		"test": "jest --config jest.config.ts"
 	},
 	"author": "Artur Khabibulin",
 	"license": "ISC",
